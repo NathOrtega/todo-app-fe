@@ -1,0 +1,118 @@
+:root {
+  --pageFont: 'Josefin Sans', sans-serif;
+  --pageFontSize: 18px;
+  --pageFontNormalWeight: 400;
+  --pageFontBoldWeight: 700;
+  --pagePrimaryColor: hsl(220, 98%, 61%);
+  --checkCirclesGradient: linear-gradient(hsl(192, 100%, 67%), hsl(280, 87%, 65%));
+  --activeFontColor: #4f505c;
+  --inactiveFontColor: #b1b0b4;
+  --backgroundColor: #f3f3f5;
+  --secondaryColor: white;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  font-family: var(--pageFont);
+  font-size: var(--pageFontSize);
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--backgroundColor);
+}
+
+.banner {
+  width: 100%;
+  height: 200px;
+  background-image: url(./Resources/bg-mobile-light.jpg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.header {
+  width: 80%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin: 40px 0;
+}
+
+.title {
+  color: var(--secondaryColor);
+  font-size: 30px;
+  font-weight: var(--pageFontBoldWeight);
+  letter-spacing: 10px;
+}
+
+.modeIconButton {
+  border-radius: 50%;
+  border: none;
+  background-color: transparent;
+  outline: none;
+}
+
+.modeIconButton:hover {
+  cursor: pointer;
+}
+
+.input {
+  width: 80%;
+  height: 50px;
+  background-color: var(--secondaryColor);
+  border-radius: 5px;
+  padding: 10px 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.checkButtonBorder {
+  width: 30px;
+  height: 30px;
+  padding: 1px;
+  border-radius: 50%;
+  background-color: var(--inactiveFontColor);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.checkButton {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--secondaryColor);
+  outline: none;
+}
+
+.checkButton:hover {
+  cursor: pointer;
+}
+
+.checkButtonBorder:hover {
+  background-image: var(--checkCirclesGradient);
+}
+
+.createToDoInput {
+  border: none;
+  outline: none;
+}
+
+.toDosContainer {
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 5px;
+  background-color: var(--secondaryColor);
+  margin: 15px;
+}
