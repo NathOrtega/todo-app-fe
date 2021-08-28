@@ -169,10 +169,24 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
 }
 
 .itemsLeft {
   color: var(--inactiveFontColor);
+}
+
+.navBar {
+  width: 100%;
+  height: 50px;
+  background-color: var(--secondaryColor);
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 60px;
+  left: 0;
 }
 
 .clearCompletedButton {
@@ -188,17 +202,7 @@ body {
   color: var(--activeFontColor);
 }
 
-.navBar {
-  width: 100%;
-  height: 50px;
-  background-color: var(--secondaryColor);
-  border-radius: 5px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.button {
+.navButton {
   color: var(--inactiveFontColor);
   border: none;
   background-color: transparent;
@@ -206,7 +210,7 @@ body {
   font-weight: var(--pageFontBoldWeight);
 }
 
-.button:hover {
+.navButton:hover {
   cursor: pointer;
   color: var(--activeFontColor);
 }
@@ -219,5 +223,16 @@ body {
 
   .mainContainer {
     width: 40%;
+  }
+
+  .navBar {
+    width: fit-content;
+    height: fit-content;
+    background-color: transparent;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: unset;
   }
 }
