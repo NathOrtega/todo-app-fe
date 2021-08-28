@@ -21,6 +21,9 @@
 body {
   min-height: 100vh;
   background-color: var(--backgroundColor);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 .banner {
@@ -38,7 +41,6 @@ body {
   flex-direction: column;
   position: absolute;
   top: 0;
-  left: 10%;
 }
 
 .header {
@@ -207,4 +209,15 @@ body {
 .button:hover {
   cursor: pointer;
   color: var(--activeFontColor);
+}
+
+@media screen and (min-width:1024px) {
+  .banner {
+    height: 225px;
+    background-image: url(./Resources/bg-desktop-light.jpg);
+  }
+
+  .mainContainer {
+    width: 40%;
+  }
 }
