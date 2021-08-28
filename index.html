@@ -11,7 +11,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="banner">
+  <div class="banner"></div>
+  <div class="mainContainer">
     <div class="header">
       <h1 class="title">TODO</h1>
       <button class="modeIconButton">
@@ -26,23 +27,25 @@
     </div>
     <div class="toDosContainer">
       <div class="toDo">
-        <button class="checkButton"></button>
-        <p class="toDoTask text">This is a todo task</p>
+        <div class="checkButtonAndTextContainer">
+          <div class="checkButtonBorder">
+            <button class="checkButton"></button>
+          </div>
+          <p class="text">This is a todo task</p>
+        </div>
         <button class="deleteButton" id="deleteButton">
           <img src="./Resources/icon-cross.svg" alt="Delete Cross">
         </button>
       </div>
-      <div class="todosContainerFooter">
-        <nav class="mainNavBar">
-          <p class="quantityOfItems text" id="itemsLeft">0 items left</p>
-          <div class="secondaryNavBar">
-            <button class="button" id="allToDosButton">All</button>
-            <button class="button" id="activeToDosButton">Active</button>
-            <button class="button" id="completedToDosButton">Completed</button>
-          </div>
-          <button class="clearCompletedButton text" id="clearCompletedButton">Clear Completed</button>
-        </nav>
+      <div class="toDosFooterContainer">
+        <p class="itemsLeft text" id="itemsLeft">0 items left</p>
+        <button class="clearCompletedButton text" id="clearCompletedButton">Clear Completed</button>
       </div>
+    </div>
+    <div class="navBar">
+      <button class="button text" id="allToDosButton">All</button>
+      <button class="button text" id="activeToDosButton">Active</button>
+      <button class="button text" id="completedToDosButton">Completed</button>
     </div>
   </div>
   <script src="./script.js"></script>
