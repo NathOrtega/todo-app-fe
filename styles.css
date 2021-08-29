@@ -135,13 +135,8 @@ body {
   display: flex;
   padding: 10px 20px;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   border-bottom: 1px solid var(--inactiveFontColor);
-}
-
-.checkButtonAndTextContainer {
-  display: flex;
-  align-items: center;
 }
 
 .text {
@@ -154,6 +149,7 @@ body {
   border: none;
   background-color: transparent;
   outline: none;
+  margin-left: auto;
 }
 
 .deleteButton:hover {
