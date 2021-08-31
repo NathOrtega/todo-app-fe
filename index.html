@@ -21,20 +21,27 @@
     </div>
     <div class="inputContainer">
       <div class="checkButtonBorder">
-        <button class="checkButton"></button>
+        <button class="checkButton">
+          <img src="./Resources/icon-check.svg" alt="CheckIcon">
+        </button>
       </div>
       <input type="text" class="toDoInput text" id="toDoInput" placeholder="Create a new todo...">
     </div>
     <div class="toDosContainer">
-      <div class="toDo">
+      <div class="allToDosContainer" id="allToDosContainer"></div>
+      <div class="activeToDosContainer undisplay" id="activeToDosContainer"></div>
+      <div class="completedToDosContainer undisplay" id="completedToDosContainer"></div>
+      <!-- <div class="toDo">
         <div class="checkButtonBorder">
-          <button class="checkButton"></button>
+          <button class="checkButton">
+            <img src="./Resources/icon-check.svg" alt="">
+          </button>
         </div>
         <p class="text">This is a todo task</p>
         <button class="deleteButton" id="deleteButton">
           <img src="./Resources/icon-cross.svg" alt="Delete Cross">
         </button>
-      </div>
+      </div> -->
       <div class="toDosFooter">
         <p class="itemsLeft text" id="itemsLeft">0 items left</p>
         <div class="navBar">

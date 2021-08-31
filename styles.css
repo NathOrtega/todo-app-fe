@@ -1,6 +1,6 @@
 :root {
   --pageFont: 'Josefin Sans', sans-serif;
-  --pageFontSize: 15px;
+  --pageFontSize: 16px;
   --pageFontNormalWeight: 400;
   --pageFontBoldWeight: 700;
   --pagePrimaryColor: hsl(220, 98%, 61%);
@@ -35,6 +35,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
+  overflow-y: scroll;
 }
 
 .banner {
@@ -111,6 +112,13 @@ body {
   border: none;
   background-color: var(--secondaryColor);
   outline: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.active {
+  background-image: var(--checkCirclesGradient);
 }
 
 .checkButton:hover {
@@ -128,19 +136,21 @@ body {
   background-color: transparent;
 }
 
-input::placeholder {
-  padding-top: 1px;
-}
-
 .toDosContainer {
-  max-height: 350px;
   width: 100%;
+  height: fit-content;
   display: flex;
   flex-direction: column;
   align-items: center;
   border-radius: 5px;
   background-color: var(--secondaryColor);
-  margin: 15px 0;
+  margin: 20px 0;
+}
+
+.allToDosContainer, .activeToDosContainer, .completedToDosContainer {
+  width: inherit;
+  height: inherit;
+  border-radius: inherit;
 }
 
 .toDo {
@@ -227,6 +237,10 @@ input::placeholder {
   color: var(--activeFontColor);
 }
 
+.undisplay {
+  display: none;
+}
+
 @media screen and (min-width:1024px) {
   .banner {
     height: 225px;
@@ -235,6 +249,7 @@ input::placeholder {
 
   .mainContainer {
     width: 40%;
+    top: 20px;
   }
 
   .navBar {
