@@ -1,24 +1,33 @@
 const modeButton = document.getElementById("modeIconButton");
 const modeIcon = document.getElementById("modeIcon");
 const prefersDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
-const checkButtons = Array.from(document.getElementsByClassName("checkButton"));
+const inputCheckButton = document.getElementById("inputCheckButton");
 const toDoInput = document.getElementById("toDoInput");
 
-checkButtons.forEach(button => {
-  button.onclick = () => {
-    button.classList.toggle("active");
-  }
-});
+window.onload = () => {
+  getAllToDos();
+}
 
-toDoInput.onkeypress = keyPressed => {
+inputCheckButton.onclick = () => {
+  const inputText = inputCheckButton.parentElement.nextElementSibling;
+  toggleActiveClass(inputCheckButton);
+  toggleCompletedClass(inputText);
+  if (inputCheckButton.classList.contains("active")){
+    inputText.placeholder = "Create a new completed task...";
+  } else {
+    inputText.placeholder = "Create a new todo...";
+  }
+}
+
+toDoInput.onkeypress = async keyPressed => {
   if (keyPressed.key === "Enter"){
     if (toDoInput.value.trim() !== ""){
       const toDo = toDoInput.value;
-      const checkButton=toDoInput.previousElementSibling.firstElementChild;
-      const isCompleted=checkButton.classList.contains("active");
-      postNewToDo(toDo, isCompleted);
+      const checkButton = toDoInput.previousElementSibling.firstElementChild;
+      const isCompleted = checkButton.classList.contains("active");
+      await postNewToDo(toDo, isCompleted);
       getAllToDos();
-      toDoInput.value=null
+      toDoInput.value = null
     }
   }
 }
@@ -41,27 +50,52 @@ async function postNewToDo(toDo, isCompleted){
 }
 
 async function getAllToDos(){
-  const allToDosContainer=document.getElementById("allToDosContainer");
+  const allToDosContainer = document.getElementById("allToDosContainer");
+  allToDosContainer.innerHTML = null;
   try {
-    const toDos=await fetch("https://todos-app-be.herokuapp.com/todos");
-    const toDosJson=await toDos.json()
+    const toDos = await fetch("https://todos-app-be.herokuapp.com/todos");
+    const toDosJson = await toDos.json()
     toDosJson.map(toDo => {
-      allToDosContainer.innerHTML+=`
+      allToDosContainer.innerHTML += `
       <div class="toDo">
       <div class="checkButtonBorder">
-        <button class="checkButton">
+        <button class="checkButton ${toDo.isCompleted ? "active" : ""}">
           <img src="./Resources/icon-check.svg" alt="">
         </button>
       </div>
-      <p class="text">${toDo.description}</p>
+      <p class="text ${toDo.isCompleted ? "completed" : ""}">${toDo.description}</p>
       <button class="deleteButton" id="deleteButton">
         <img src="./Resources/icon-cross.svg" alt="Delete Cross">
       </button>
       `
     })
+    const checkButtons = Array.from(document.getElementsByClassName("checkButton"));
+    listenCheckButtons(checkButtons);
   } catch(error){
     console.log(error)
   }
+}
+
+function listenCheckButtons(buttonsArray){
+  buttonsArray.forEach(button => {
+    button.onclick = () => {
+      toggleActiveClass(button);
+      const task = button.parentElement.nextElementSibling;
+      if (button.classList.contains("active")){
+        task.classList.add("completed");
+      } else {
+        task.classList.remove("completed");
+      }
+    }
+  });
+}
+
+function toggleActiveClass(button){
+  button.classList.toggle("active");
+}
+
+function toggleCompletedClass(text){
+  text.classList.toggle("completed");
 }
 
 function changeThemeIcon(){

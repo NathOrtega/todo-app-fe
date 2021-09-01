@@ -169,6 +169,11 @@ body {
   color: var(--activeFontColor);
 }
 
+.completed {
+  text-decoration: line-through;
+  color: var(--inactiveFontColor);
+}
+
 .deleteButton {
   width: fit-content;
   height: fit-content;
