@@ -3,6 +3,49 @@ const modeIcon = document.getElementById("modeIcon");
 const prefersDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
 const inputCheckButton = document.getElementById("inputCheckButton");
 const toDoInput = document.getElementById("toDoInput");
+const allToDosButton = document.getElementById("allToDosButton");
+const activeToDosButton = document.getElementById("activeToDosButton");
+const completedToDosButton = document.getElementById("completedToDosButton");
+const allToDosContainer = document.getElementById("allToDosContainer");
+const activeToDosContainer = document.getElementById("activeToDosContainer");
+const completedToDosContainer = document.getElementById("completedToDosContainer");
+
+allToDosButton.onclick = () => {
+  allToDosButton.style.color = "var(--pagePrimaryColor)";
+  allToDosContainer.classList.remove("undisplay");
+  activeToDosButton.style.color = "var(--inactiveFontColor)";
+  activeToDosContainer.classList.add("undisplay");
+  completedToDosButton.style.color = "var(--inactiveFontColor)";
+  completedToDosContainer.classList.add("undisplay"); 
+}
+
+activeToDosButton.onclick = async () => {
+  try {
+    getActiveToDos();
+  } catch(error){
+    console.error(error);
+  }
+  allToDosButton.style.color = "var(--inactiveFontColor)";
+  allToDosContainer.classList.add("undisplay");
+  activeToDosButton.style.color = "var(--pagePrimaryColor)";
+  activeToDosContainer.classList.remove("undisplay");
+  completedToDosButton.style.color = "var(--inactiveFontColor)";
+  completedToDosContainer.classList.add("undisplay"); 
+}
+
+completedToDosButton.onclick = async () => {
+  try {
+    getCompletedToDos();
+  } catch(error){
+    console.error(error);
+  }
+  allToDosButton.style.color = "var(--inactiveFontColor)";
+  allToDosContainer.classList.add("undisplay");
+  activeToDosButton.style.color = "var(--inactiveFontColor)";
+  activeToDosContainer.classList.add("undisplay");
+  completedToDosButton.style.color = "var(--pagePrimaryColor)";
+  completedToDosContainer.classList.remove("undisplay"); 
+}
 
 window.onload = () => {
   getAllToDos();
@@ -25,8 +68,15 @@ toDoInput.onkeypress = async keyPressed => {
       const toDo = toDoInput.value;
       const checkButton = toDoInput.previousElementSibling.firstElementChild;
       const isCompleted = checkButton.classList.contains("active");
-      await postNewToDo(toDo, isCompleted);
+      try {
+        await postNewToDo(toDo, isCompleted);
+      } catch(error){
+        console.error(error);
+      }
       getAllToDos();
+      if (!isCompleted){
+        getActiveToDos()
+      }
       toDoInput.value = null
     }
   }
@@ -50,7 +100,6 @@ async function postNewToDo(toDo, isCompleted){
 }
 
 async function getAllToDos(){
-  const allToDosContainer = document.getElementById("allToDosContainer");
   allToDosContainer.innerHTML = null;
   try {
     const toDos = await fetch("https://todos-app-be.herokuapp.com/todos");
@@ -69,10 +118,64 @@ async function getAllToDos(){
       </button>
       `
     })
-    const checkButtons = Array.from(document.getElementsByClassName("checkButton"));
+    const checkButtons = Array.from(document.querySelectorAll(".checkButton:not(#inputCheckButton)"));
     listenCheckButtons(checkButtons);
   } catch(error){
     console.log(error)
+  }
+}
+
+async function getActiveToDos(){
+  activeToDosContainer.innerHTML = null;
+  try {
+    const toDos = await fetch("https://todos-app-be.herokuapp.com/todos");
+    const toDosJson = await toDos.json()
+    const activeToDos = toDosJson.filter(toDo => !toDo.isCompleted);
+    activeToDos.map(toDo => {
+      activeToDosContainer.innerHTML += `
+      <div class="toDo">
+      <div class="checkButtonBorder">
+        <button class="checkButton">
+          <img src="./Resources/icon-check.svg" alt="">
+        </button>
+      </div>
+      <p class="text">${toDo.description}</p>
+      <button class="deleteButton" id="deleteButton">
+        <img src="./Resources/icon-cross.svg" alt="Delete Cross">
+      </button>
+      `
+    })
+    const checkButtons = Array.from(document.querySelectorAll(".checkButton:not(#inputCheckButton)"));
+    listenCheckButtons(checkButtons);
+  } catch(error){
+  console.log(error)
+  }
+}
+
+async function getCompletedToDos(){
+  completedToDosContainer.innerHTML = null;
+  try {
+    const toDos = await fetch("https://todos-app-be.herokuapp.com/todos");
+    const toDosJson = await toDos.json()
+    const completedToDos = toDosJson.filter(toDo => toDo.isCompleted);
+    completedToDos.map(toDo => {
+      completedToDosContainer.innerHTML += `
+      <div class="toDo">
+      <div class="checkButtonBorder">
+        <button class="checkButton active">
+          <img src="./Resources/icon-check.svg" alt="">
+        </button>
+      </div>
+      <p class="text completed">${toDo.description}</p>
+      <button class="deleteButton" id="deleteButton">
+        <img src="./Resources/icon-cross.svg" alt="Delete Cross">
+      </button>
+      `
+    })
+    const checkButtons = Array.from(document.querySelectorAll(".checkButton:not(#inputCheckButton)"));
+    listenCheckButtons(checkButtons);
+  } catch(error){
+  console.log(error)
   }
 }
 

@@ -242,6 +242,10 @@ body {
   color: var(--activeFontColor);
 }
 
+#allToDosButton {
+  color: var(--pagePrimaryColor);
+}
+
 .undisplay {
   display: none;
 }
