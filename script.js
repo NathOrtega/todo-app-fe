@@ -129,7 +129,7 @@ async function getAllToDos() {
     const checkButtons = createCheckButtonsArray();
     listenCheckButtons(checkButtons);
 
-    setItemsLeft(allToDosContainer);
+    setItemsLeft();
 
     const deleteButtons = createDeleteButtonsArray();
     listenDeleteButtons(deleteButtons, getAllToDos);
@@ -150,7 +150,7 @@ async function getActiveToDos() {
     const checkButtons = createCheckButtonsArray();
     listenCheckButtons(checkButtons);
 
-    setItemsLeft(activeToDosContainer);
+    setItemsLeft();
 
     const deleteButtons = createDeleteButtonsArray();
     listenDeleteButtons(deleteButtons, getActiveToDos);
@@ -171,7 +171,7 @@ async function getCompletedToDos() {
     const checkButtons = createCheckButtonsArray();
     listenCheckButtons(checkButtons);
 
-    setItemsLeft(completedToDosContainer);
+    setItemsLeft();
 
     const deleteButtons = createDeleteButtonsArray();
     listenDeleteButtons(deleteButtons, getCompletedToDos);
@@ -206,8 +206,9 @@ function createDeleteButtonsArray(){
   return buttons;
 }
 
-function setItemsLeft(container){
-  const numberOfItemsLeft = container.childElementCount;
+function setItemsLeft(){
+  const currentToDosContainer = document.querySelectorAll(".toDosContainer>div:not(.undisplay, .toDosFooter)")[0];
+  const numberOfItemsLeft = currentToDosContainer.childElementCount;
   const itemsLeft = document.getElementById("itemsLeft");
   itemsLeft.innerText = `${numberOfItemsLeft} items left`
 }
