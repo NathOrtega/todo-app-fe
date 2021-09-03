@@ -1,5 +1,4 @@
 const modeButton = document.getElementById("modeIconButton");
-const modeIcon = document.getElementById("modeIcon");
 const prefersDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
 const inputCheckButton = document.getElementById("inputCheckButton");
 const toDoInput = document.getElementById("toDoInput");
@@ -14,7 +13,7 @@ const clearCompletedButton = document.getElementById("clearCompletedButton");
 window.onload = async () => {
   try {
     await getAllToDos();
-  } catch(error){
+  } catch (error) {
     console.error(error);
   }
 }
@@ -22,7 +21,7 @@ window.onload = async () => {
 allToDosButton.onclick = () => {
   try {
     getAllToDos();
-  } catch(error){
+  } catch (error) {
     console.error(error);
   }
   allToDosButton.style.color = "var(--pagePrimaryColor)";
@@ -30,13 +29,13 @@ allToDosButton.onclick = () => {
   activeToDosButton.style.color = "var(--inactiveFontColor)";
   activeToDosContainer.classList.add("undisplay");
   completedToDosButton.style.color = "var(--inactiveFontColor)";
-  completedToDosContainer.classList.add("undisplay"); 
+  completedToDosContainer.classList.add("undisplay");
 }
 
 activeToDosButton.onclick = async () => {
   try {
     getActiveToDos();
-  } catch(error){
+  } catch (error) {
     console.error(error);
   }
   allToDosButton.style.color = "var(--inactiveFontColor)";
@@ -44,13 +43,13 @@ activeToDosButton.onclick = async () => {
   activeToDosButton.style.color = "var(--pagePrimaryColor)";
   activeToDosContainer.classList.remove("undisplay");
   completedToDosButton.style.color = "var(--inactiveFontColor)";
-  completedToDosContainer.classList.add("undisplay"); 
+  completedToDosContainer.classList.add("undisplay");
 }
 
 completedToDosButton.onclick = async () => {
   try {
     getCompletedToDos();
-  } catch(error){
+  } catch (error) {
     console.error(error);
   }
   allToDosButton.style.color = "var(--inactiveFontColor)";
@@ -58,14 +57,14 @@ completedToDosButton.onclick = async () => {
   activeToDosButton.style.color = "var(--inactiveFontColor)";
   activeToDosContainer.classList.add("undisplay");
   completedToDosButton.style.color = "var(--pagePrimaryColor)";
-  completedToDosContainer.classList.remove("undisplay"); 
+  completedToDosContainer.classList.remove("undisplay");
 }
 
 inputCheckButton.onclick = () => {
   const inputText = inputCheckButton.parentElement.nextElementSibling;
   toggleActiveClass(inputCheckButton);
   toggleCompletedClass(inputText);
-  if (inputCheckButton.classList.contains("active")){
+  if (inputCheckButton.classList.contains("active")) {
     inputText.placeholder = "Create a new completed task...";
   } else {
     inputText.placeholder = "Create a new todo...";
@@ -73,27 +72,27 @@ inputCheckButton.onclick = () => {
 }
 
 toDoInput.onkeypress = async keyPressed => {
-  if (keyPressed.key === "Enter"){
-    if (toDoInput.value.trim() !== ""){
+  if (keyPressed.key === "Enter") {
+    if (toDoInput.value.trim() !== "") {
       const toDo = toDoInput.value;
       const checkButton = toDoInput.previousElementSibling.firstElementChild;
       const isCompleted = checkButton.classList.contains("active");
       try {
         await postNewToDo(toDo, isCompleted);
         await getAllToDos();
-      } catch(error){
+      } catch (error) {
         console.error(error);
       }
-      if (!isCompleted){
+      if (!isCompleted) {
         try {
           await getActiveToDos();
-        } catch(error){
+        } catch (error) {
           console.error(error);
         }
       } else {
         try {
           await getCompletedToDos();;
-        } catch(error){
+        } catch (error) {
           console.error(error);
         }
       }
@@ -102,140 +101,133 @@ toDoInput.onkeypress = async keyPressed => {
   }
 }
 
-async function postNewToDo(toDo, isCompleted){
+async function postNewToDo(toDo, isCompleted) {
   try {
     await fetch("https://todos-app-be.herokuapp.com/todos", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify ({
+      body: JSON.stringify({
         "description": toDo,
         "isCompleted": isCompleted
       })
     })
-  } catch(error) {
+  } catch (error) {
     console.error(error);
   }
 }
 
-async function getAllToDos(){
+async function getAllToDos() {
   allToDosContainer.innerHTML = null;
   try {
     const toDos = await fetch("https://todos-app-be.herokuapp.com/todos");
     const toDosJson = await toDos.json()
     toDosJson.map(toDo => {
-      allToDosContainer.innerHTML += `
-      <div class="toDo">
-      <div class="checkButtonBorder">
-        <button class="checkButton ${toDo.isCompleted ? "active" : ""}">
-          <img src="./Resources/icon-check.svg" alt="">
-        </button>
-      </div>
-      <p class="text ${toDo.isCompleted ? "completed" : ""}" id="${toDo.id}">${toDo.description}</p>
-      <button class="deleteButton">
-        <img src="./Resources/icon-cross.svg" alt="Delete Cross">
-      </button>
-      `
+      allToDosContainer.innerHTML += createTaskTemplate(toDo.isCompleted, toDo.id, toDo.description);
     })
-    const checkButtons = Array.from(document.querySelectorAll(".checkButton:not(#inputCheckButton)"));
+    const checkButtons = createCheckButtonsArray();
     listenCheckButtons(checkButtons);
 
-    const numberOfItemsLeft = allToDosContainer.childElementCount;
-    const itemsLeft = document.getElementById("itemsLeft");
-    itemsLeft.innerText = `${numberOfItemsLeft} items left`
+    setItemsLeft(allToDosContainer);
 
-    const deleteButtons = Array.from(document.getElementsByClassName("deleteButton"));
+    const deleteButtons = createDeleteButtonsArray();
     listenDeleteButtons(deleteButtons, getAllToDos);
-  } catch(error){
+  } catch (error) {
     console.error(error)
   }
 }
 
-async function getActiveToDos(){
+async function getActiveToDos() {
   activeToDosContainer.innerHTML = null;
   try {
     const toDos = await fetch("https://todos-app-be.herokuapp.com/todos");
     const toDosJson = await toDos.json()
     const activeToDos = toDosJson.filter(toDo => !toDo.isCompleted);
     activeToDos.map(toDo => {
-      activeToDosContainer.innerHTML += `
-      <div class="toDo">
-      <div class="checkButtonBorder">
-        <button class="checkButton">
-          <img src="./Resources/icon-check.svg" alt="">
-        </button>
-      </div>
-      <p class="text" id="${toDo.id}">${toDo.description}</p>
-      <button class="deleteButton">
-        <img src="./Resources/icon-cross.svg" alt="Delete Cross">
-      </button>
-      `
+      activeToDosContainer.innerHTML += createTaskTemplate(toDo.isCompleted, toDo.id, toDo.description);
     })
-    const checkButtons = Array.from(document.querySelectorAll(".checkButton:not(#inputCheckButton)"));
+    const checkButtons = createCheckButtonsArray();
     listenCheckButtons(checkButtons);
 
-    const numberOfItemsLeft = activeToDosContainer.childElementCount;
-    const itemsLeft = document.getElementById("itemsLeft");
-    itemsLeft.innerText = `${numberOfItemsLeft} items left`
+    setItemsLeft(activeToDosContainer);
 
-    const deleteButtons = Array.from(document.getElementsByClassName("deleteButton"));
+    const deleteButtons = createDeleteButtonsArray();
     listenDeleteButtons(deleteButtons, getActiveToDos);
-  } catch(error){
-  console.error(error)
+  } catch (error) {
+    console.error(error)
   }
 }
 
-async function getCompletedToDos(){
+async function getCompletedToDos() {
   completedToDosContainer.innerHTML = null;
   try {
     const toDos = await fetch("https://todos-app-be.herokuapp.com/todos");
     const toDosJson = await toDos.json()
     const completedToDos = toDosJson.filter(toDo => toDo.isCompleted);
     completedToDos.map(toDo => {
-      completedToDosContainer.innerHTML += `
-      <div class="toDo">
-      <div class="checkButtonBorder">
-        <button class="checkButton active">
-          <img src="./Resources/icon-check.svg" alt="">
-        </button>
-      </div>
-      <p class="text completed" id="${toDo.id}">${toDo.description}</p>
-      <button class="deleteButton">
-        <img src="./Resources/icon-cross.svg" alt="Delete Cross">
-      </button>
-      `
+      completedToDosContainer.innerHTML += createTaskTemplate(toDo.isCompleted, toDo.id, toDo.description);
     })
-    const checkButtons = Array.from(document.querySelectorAll(".checkButton:not(#inputCheckButton)"));
+    const checkButtons = createCheckButtonsArray();
     listenCheckButtons(checkButtons);
 
-    const numberOfItemsLeft = completedToDosContainer.childElementCount;
-    const itemsLeft = document.getElementById("itemsLeft");
-    itemsLeft.innerText = `${numberOfItemsLeft} items left`
+    setItemsLeft(completedToDosContainer);
 
-    const deleteButtons = Array.from(document.getElementsByClassName("deleteButton"));
+    const deleteButtons = createDeleteButtonsArray();
     listenDeleteButtons(deleteButtons, getCompletedToDos);
-  } catch(error){
+  } catch (error) {
     console.error(error)
   }
 }
 
-function listenCheckButtons(checkButtonsArray){
+function createTaskTemplate(isCompleted, id, description) {
+  const template = `
+  <div class="toDo">
+  <div class="checkButtonBorder">
+    <button class="checkButton ${isCompleted ? "active" : ""}">
+      <img src="./Resources/icon-check.svg" alt="">
+    </button>
+  </div>
+  <p class="text ${isCompleted ? "completed" : ""}" id="${id}">${description}</p>
+  <button class="deleteButton">
+    <img src="./Resources/icon-cross.svg" alt="Delete Cross">
+  </button>
+  `
+  return template;
+}
+
+function createCheckButtonsArray(){
+  const buttons = Array.from(document.querySelectorAll(".checkButton:not(#inputCheckButton)"));
+  return buttons;
+}
+
+function createDeleteButtonsArray(){
+  const buttons = Array.from(document.getElementsByClassName("deleteButton"));
+  return buttons;
+}
+
+function setItemsLeft(container){
+  const numberOfItemsLeft = container.childElementCount;
+  const itemsLeft = document.getElementById("itemsLeft");
+  itemsLeft.innerText = `${numberOfItemsLeft} items left`
+}
+
+function listenCheckButtons(checkButtonsArray) {
   checkButtonsArray.forEach(button => {
     button.onclick = async () => {
       toggleActiveClass(button);
       const task = button.parentElement.nextElementSibling;
-      if (button.classList.contains("active")){
+      if (button.classList.contains("active")) {
         try {
           await patchTask(task.id, task.innerText, true);
-        } catch(error){
+        } catch (error) {
           console.error(error);
         }
         task.classList.add("completed");
       } else {
         try {
           const response = patchTask(task.id, task.innerText, false);
-        } catch(error){
+        } catch (error) {
           console.error(error);
         }
         task.classList.remove("completed");
@@ -244,24 +236,24 @@ function listenCheckButtons(checkButtonsArray){
   });
 }
 
-async function patchTask(id, description, isCompleted){
+async function patchTask(id, description, isCompleted) {
   try {
     await fetch(`https://todos-app-be.herokuapp.com/todos/${id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify ({
+      body: JSON.stringify({
         "description": description,
         "isCompleted": isCompleted
       })
     })
-  } catch(error){
+  } catch (error) {
     console.error(error);
   }
 }
 
-function listenDeleteButtons(deleteButtonsArray, deletedTaskContainerFunction){
+function listenDeleteButtons(deleteButtonsArray, deletedTaskContainerFunction) {
   deleteButtonsArray.forEach(button => {
     button.onclick = async () => {
       const taskId = button.previousElementSibling.id;
@@ -270,7 +262,7 @@ function listenDeleteButtons(deleteButtonsArray, deletedTaskContainerFunction){
           method: "DELETE"
         });
         await deletedTaskContainerFunction();
-      } catch(error){
+      } catch (error) {
         console.error(error);
       }
     }
@@ -283,20 +275,21 @@ clearCompletedButton.onclick = async () => {
       method: "DELETE"
     });
     location.reload();
-  }catch(error){
+  } catch (error) {
     console.error(error);
   }
 }
 
-function toggleActiveClass(button){
+function toggleActiveClass(button) {
   button.classList.toggle("active");
 }
 
-function toggleCompletedClass(text){
+function toggleCompletedClass(text) {
   text.classList.toggle("completed");
 }
 
-function changeThemeIcon(){
+function changeThemeIcon() {
+  const modeIcon = document.getElementById("modeIcon");
   if (document.body.classList.contains("darkMode")) {
     modeIcon.src = "./Resources/icon-sun.svg";
   } else {
