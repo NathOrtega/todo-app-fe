@@ -61,7 +61,9 @@ completedToDosButton.onclick = async () => {
 }
 
 inputCheckButton.onclick = () => {
+  const checkIcon = document.getElementById("checkIcon");
   const inputText = inputCheckButton.parentElement.nextElementSibling;
+  toggleUndisplayClass(checkIcon);
   toggleActiveClass(inputCheckButton);
   toggleCompletedClass(inputText);
   if (inputCheckButton.classList.contains("active")) {
@@ -218,6 +220,8 @@ function listenCheckButtons(checkButtonsArray) {
     button.onclick = async () => {
       toggleActiveClass(button);
       const task = button.parentElement.nextElementSibling;
+      const checkIconImg = button.firstElementChild;
+      toggleUndisplayClass(checkIconImg);
       if (button.classList.contains("active")) {
         try {
           await patchTask(task.id, task.innerText, true);
@@ -287,6 +291,10 @@ function toggleActiveClass(button) {
 
 function toggleCompletedClass(text) {
   text.classList.toggle("completed");
+}
+
+function toggleUndisplayClass(element){
+  element.classList.toggle("undisplay");
 }
 
 function changeThemeIcon() {
