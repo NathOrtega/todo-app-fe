@@ -63,7 +63,7 @@ completedToDosButton.onclick = async () => {
 inputCheckButton.onclick = () => {
   const checkIcon = document.getElementById("checkIcon");
   const inputText = inputCheckButton.parentElement.nextElementSibling;
-  toggleUndisplayClass(checkIcon);
+  checkIcon.classList.toggle("undisplay");
   toggleActiveClass(inputCheckButton);
   toggleCompletedClass(inputText);
   if (inputCheckButton.classList.contains("active")) {
@@ -187,7 +187,7 @@ function createTaskTemplate(isCompleted, id, description) {
   <div class="toDo">
   <div class="checkButtonBorder">
     <button class="checkButton ${isCompleted ? "active" : ""}">
-      <img src="./Resources/icon-check.svg" alt="">
+      <img src="./Resources/icon-check.svg" alt="check Icon" class="${isCompleted ? "" : "undisplay"}">
     </button>
   </div>
   <p class="text ${isCompleted ? "completed" : ""}" id="${id}">${description}</p>
@@ -221,8 +221,8 @@ function listenCheckButtons(checkButtonsArray) {
       toggleActiveClass(button);
       const task = button.parentElement.nextElementSibling;
       const checkIconImg = button.firstElementChild;
-      toggleUndisplayClass(checkIconImg);
       if (button.classList.contains("active")) {
+        checkIconImg.classList.remove("undisplay");
         try {
           await patchTask(task.id, task.innerText, true);
         } catch (error) {
@@ -230,6 +230,7 @@ function listenCheckButtons(checkButtonsArray) {
         }
         task.classList.add("completed");
       } else {
+        checkIconImg.classList.add("undisplay");
         try {
           const response = patchTask(task.id, task.innerText, false);
         } catch (error) {
@@ -291,10 +292,6 @@ function toggleActiveClass(button) {
 
 function toggleCompletedClass(text) {
   text.classList.toggle("completed");
-}
-
-function toggleUndisplayClass(element){
-  element.classList.toggle("undisplay");
 }
 
 function changeThemeIcon() {
