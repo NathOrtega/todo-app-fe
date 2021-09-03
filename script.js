@@ -9,8 +9,22 @@ const completedToDosButton = document.getElementById("completedToDosButton");
 const allToDosContainer = document.getElementById("allToDosContainer");
 const activeToDosContainer = document.getElementById("activeToDosContainer");
 const completedToDosContainer = document.getElementById("completedToDosContainer");
+const clearCompletedButton = document.getElementById("clearCompletedButton");
+
+window.onload = async () => {
+  try {
+    await getAllToDos();
+  } catch(error){
+    console.error(error);
+  }
+}
 
 allToDosButton.onclick = () => {
+  try {
+    getAllToDos();
+  } catch(error){
+    console.error(error);
+  }
   allToDosButton.style.color = "var(--pagePrimaryColor)";
   allToDosContainer.classList.remove("undisplay");
   activeToDosButton.style.color = "var(--inactiveFontColor)";
@@ -47,10 +61,6 @@ completedToDosButton.onclick = async () => {
   completedToDosContainer.classList.remove("undisplay"); 
 }
 
-window.onload = () => {
-  getAllToDos();
-}
-
 inputCheckButton.onclick = () => {
   const inputText = inputCheckButton.parentElement.nextElementSibling;
   toggleActiveClass(inputCheckButton);
@@ -70,12 +80,22 @@ toDoInput.onkeypress = async keyPressed => {
       const isCompleted = checkButton.classList.contains("active");
       try {
         await postNewToDo(toDo, isCompleted);
+        await getAllToDos();
       } catch(error){
         console.error(error);
       }
-      getAllToDos();
       if (!isCompleted){
-        getActiveToDos()
+        try {
+          await getActiveToDos();
+        } catch(error){
+          console.error(error);
+        }
+      } else {
+        try {
+          await getCompletedToDos();;
+        } catch(error){
+          console.error(error);
+        }
       }
       toDoInput.value = null
     }
@@ -112,16 +132,23 @@ async function getAllToDos(){
           <img src="./Resources/icon-check.svg" alt="">
         </button>
       </div>
-      <p class="text ${toDo.isCompleted ? "completed" : ""}">${toDo.description}</p>
-      <button class="deleteButton" id="deleteButton">
+      <p class="text ${toDo.isCompleted ? "completed" : ""}" id="${toDo.id}">${toDo.description}</p>
+      <button class="deleteButton">
         <img src="./Resources/icon-cross.svg" alt="Delete Cross">
       </button>
       `
     })
     const checkButtons = Array.from(document.querySelectorAll(".checkButton:not(#inputCheckButton)"));
     listenCheckButtons(checkButtons);
+
+    const numberOfItemsLeft = allToDosContainer.childElementCount;
+    const itemsLeft = document.getElementById("itemsLeft");
+    itemsLeft.innerText = `${numberOfItemsLeft} items left`
+
+    const deleteButtons = Array.from(document.getElementsByClassName("deleteButton"));
+    listenDeleteButtons(deleteButtons, getAllToDos);
   } catch(error){
-    console.log(error)
+    console.error(error)
   }
 }
 
@@ -139,16 +166,23 @@ async function getActiveToDos(){
           <img src="./Resources/icon-check.svg" alt="">
         </button>
       </div>
-      <p class="text">${toDo.description}</p>
-      <button class="deleteButton" id="deleteButton">
+      <p class="text" id="${toDo.id}">${toDo.description}</p>
+      <button class="deleteButton">
         <img src="./Resources/icon-cross.svg" alt="Delete Cross">
       </button>
       `
     })
     const checkButtons = Array.from(document.querySelectorAll(".checkButton:not(#inputCheckButton)"));
     listenCheckButtons(checkButtons);
+
+    const numberOfItemsLeft = activeToDosContainer.childElementCount;
+    const itemsLeft = document.getElementById("itemsLeft");
+    itemsLeft.innerText = `${numberOfItemsLeft} items left`
+
+    const deleteButtons = Array.from(document.getElementsByClassName("deleteButton"));
+    listenDeleteButtons(deleteButtons, getActiveToDos);
   } catch(error){
-  console.log(error)
+  console.error(error)
   }
 }
 
@@ -166,31 +200,92 @@ async function getCompletedToDos(){
           <img src="./Resources/icon-check.svg" alt="">
         </button>
       </div>
-      <p class="text completed">${toDo.description}</p>
-      <button class="deleteButton" id="deleteButton">
+      <p class="text completed" id="${toDo.id}">${toDo.description}</p>
+      <button class="deleteButton">
         <img src="./Resources/icon-cross.svg" alt="Delete Cross">
       </button>
       `
     })
     const checkButtons = Array.from(document.querySelectorAll(".checkButton:not(#inputCheckButton)"));
     listenCheckButtons(checkButtons);
+
+    const numberOfItemsLeft = completedToDosContainer.childElementCount;
+    const itemsLeft = document.getElementById("itemsLeft");
+    itemsLeft.innerText = `${numberOfItemsLeft} items left`
+
+    const deleteButtons = Array.from(document.getElementsByClassName("deleteButton"));
+    listenDeleteButtons(deleteButtons, getCompletedToDos);
   } catch(error){
-  console.log(error)
+    console.error(error)
   }
 }
 
-function listenCheckButtons(buttonsArray){
-  buttonsArray.forEach(button => {
-    button.onclick = () => {
+function listenCheckButtons(checkButtonsArray){
+  checkButtonsArray.forEach(button => {
+    button.onclick = async () => {
       toggleActiveClass(button);
       const task = button.parentElement.nextElementSibling;
       if (button.classList.contains("active")){
+        try {
+          await patchTask(task.id, task.innerText, true);
+        } catch(error){
+          console.error(error);
+        }
         task.classList.add("completed");
       } else {
+        try {
+          const response = patchTask(task.id, task.innerText, false);
+        } catch(error){
+          console.error(error);
+        }
         task.classList.remove("completed");
       }
     }
   });
+}
+
+async function patchTask(id, description, isCompleted){
+  try {
+    await fetch(`https://todos-app-be.herokuapp.com/todos/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify ({
+        "description": description,
+        "isCompleted": isCompleted
+      })
+    })
+  } catch(error){
+    console.error(error);
+  }
+}
+
+function listenDeleteButtons(deleteButtonsArray, deletedTaskContainerFunction){
+  deleteButtonsArray.forEach(button => {
+    button.onclick = async () => {
+      const taskId = button.previousElementSibling.id;
+      try {
+        await fetch(`https://todos-app-be.herokuapp.com/todos/${taskId}`, {
+          method: "DELETE"
+        });
+        await deletedTaskContainerFunction();
+      } catch(error){
+        console.error(error);
+      }
+    }
+  });
+}
+
+clearCompletedButton.onclick = async () => {
+  try {
+    await fetch("https://todos-app-be.herokuapp.com/todos/completed", {
+      method: "DELETE"
+    });
+    location.reload();
+  }catch(error){
+    console.error(error);
+  }
 }
 
 function toggleActiveClass(button){
