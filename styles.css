@@ -11,6 +11,7 @@
   --secondaryColor: white;
   --MobileBackgroundImage: url(./Resources/bg-mobile-light.jpg);
   --DesktopBackgroundImage: url(./Resources/bg-desktop-light.jpg);
+  --modeIconColor: #beffeb;
 }
 
 .darkMode {
@@ -20,6 +21,7 @@
   --secondaryColor: #25273c;
   --MobileBackgroundImage: url(./Resources/bg-mobile-dark.jpg);
   --DesktopBackgroundImage: url(./Resources/bg-desktop-dark.jpg);
+  --modeIconColor: #fffd94;
 }
 
 * {
@@ -76,10 +78,11 @@ body {
   border: none;
   background-color: transparent;
   outline: none;
+  cursor: pointer;
 }
 
-.modeIconButton:hover {
-  cursor: pointer;
+.modeIconButton:hover .modeIcon {
+  fill: var(--modeIconColor);
 }
 
 .inputContainer {
@@ -115,14 +118,11 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: pointer;
 }
 
 .active {
   background-image: var(--checkCirclesGradient);
-}
-
-.checkButton:hover {
-  cursor: pointer;
 }
 
 .checkButtonBorder:hover {
@@ -181,10 +181,11 @@ body {
   background-color: transparent;
   outline: none;
   margin-left: auto;
+  cursor: pointer;
 }
 
-.deleteButton:hover {
-  cursor: pointer;
+.deleteButton:hover .deleteIcon {
+  fill: var(--pagePrimaryColor);
 }
 
 .toDosFooter {
@@ -222,10 +223,10 @@ body {
   background-color: transparent;
   outline: none;
   color: var(--inactiveFontColor);
+  cursor: pointer;
 }
 
 .clearCompletedButton:hover {
-  cursor: pointer;
   color: var(--activeFontColor);
 }
 
@@ -235,10 +236,10 @@ body {
   background-color: transparent;
   outline: none;
   font-weight: var(--pageFontBoldWeight);
+  cursor: pointer;
 }
 
 .navButton:hover {
-  cursor: pointer;
   color: var(--activeFontColor);
 }
 
