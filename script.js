@@ -9,12 +9,42 @@ const allToDosContainer = document.getElementById("allToDosContainer");
 const activeToDosContainer = document.getElementById("activeToDosContainer");
 const completedToDosContainer = document.getElementById("completedToDosContainer");
 const clearCompletedButton = document.getElementById("clearCompletedButton");
+const API_URL = "https://todos-app-be.herokuapp.com";
+let activeTab = "";
 
 window.onload = async () => {
   try {
-    await getAllToDos();
+    getAllToDos();
   } catch (error) {
     console.error(error);
+  }
+}
+
+inputCheckButton.onclick = () => {
+  const checkIcon = document.getElementById("checkIcon");
+  toggleHiddenClass(checkIcon);
+  toggleActiveClass(inputCheckButton);
+  toggleCompletedClass(toDoInput);
+  if (inputCheckButton.classList.contains("active")) {
+    toDoInput.placeholder = "Create a new completed task...";
+  } else {
+    toDoInput.placeholder = "Create a new todo...";
+  }
+}
+
+toDoInput.onkeydown = async keyPressed => {
+  if (keyPressed.key === "Enter") {
+    if (toDoInput.value.trim() !== "") {
+      const toDo = toDoInput.value;
+      const isCompleted = inputCheckButton.classList.contains("active");
+      try {
+        await createToDo(toDo, isCompleted);
+        refreshActiveTab();
+      } catch (error) {
+        console.error(error);
+      }
+      toDoInput.value = null
+    }
   }
 }
 
@@ -24,12 +54,8 @@ allToDosButton.onclick = () => {
   } catch (error) {
     console.error(error);
   }
-  allToDosButton.style.color = "var(--pagePrimaryColor)";
-  allToDosContainer.classList.remove("undisplay");
-  activeToDosButton.style.color = "var(--inactiveFontColor)";
-  activeToDosContainer.classList.add("undisplay");
-  completedToDosButton.style.color = "var(--inactiveFontColor)";
-  completedToDosContainer.classList.add("undisplay");
+  toggleFilter(allToDosButton, allToDosContainer);
+  activeTab = allToDosContainer;
 }
 
 activeToDosButton.onclick = async () => {
@@ -38,12 +64,8 @@ activeToDosButton.onclick = async () => {
   } catch (error) {
     console.error(error);
   }
-  allToDosButton.style.color = "var(--inactiveFontColor)";
-  allToDosContainer.classList.add("undisplay");
-  activeToDosButton.style.color = "var(--pagePrimaryColor)";
-  activeToDosContainer.classList.remove("undisplay");
-  completedToDosButton.style.color = "var(--inactiveFontColor)";
-  completedToDosContainer.classList.add("undisplay");
+  toggleFilter(activeToDosButton, activeToDosContainer);
+  activeTab = activeToDosContainer;
 }
 
 completedToDosButton.onclick = async () => {
@@ -52,60 +74,66 @@ completedToDosButton.onclick = async () => {
   } catch (error) {
     console.error(error);
   }
-  allToDosButton.style.color = "var(--inactiveFontColor)";
-  allToDosContainer.classList.add("undisplay");
-  activeToDosButton.style.color = "var(--inactiveFontColor)";
-  activeToDosContainer.classList.add("undisplay");
-  completedToDosButton.style.color = "var(--pagePrimaryColor)";
-  completedToDosContainer.classList.remove("undisplay");
+  toggleFilter(completedToDosButton, completedToDosContainer);
+  activeTab = completedToDosContainer;
 }
 
-inputCheckButton.onclick = () => {
-  const checkIcon = document.getElementById("checkIcon");
-  const inputText = inputCheckButton.parentElement.nextElementSibling;
-  checkIcon.classList.toggle("undisplay");
-  toggleActiveClass(inputCheckButton);
-  toggleCompletedClass(inputText);
-  if (inputCheckButton.classList.contains("active")) {
-    inputText.placeholder = "Create a new completed task...";
-  } else {
-    inputText.placeholder = "Create a new todo...";
+clearCompletedButton.onclick = async () => {
+  try {
+    await fetch(`${API_URL}/todos/completed`, {
+      method: "DELETE"
+    });
+    location.reload();
+  } catch (error) {
+    console.error(error);
   }
 }
 
-toDoInput.onkeypress = async keyPressed => {
-  if (keyPressed.key === "Enter") {
-    if (toDoInput.value.trim() !== "") {
-      const toDo = toDoInput.value;
-      const checkButton = toDoInput.previousElementSibling.firstElementChild;
-      const isCompleted = checkButton.classList.contains("active");
-      try {
-        await postNewToDo(toDo, isCompleted);
-        await getAllToDos();
-      } catch (error) {
-        console.error(error);
-      }
-      if (!isCompleted) {
-        try {
-          await getActiveToDos();
-        } catch (error) {
-          console.error(error);
-        }
-      } else {
-        try {
-          await getCompletedToDos();;
-        } catch (error) {
-          console.error(error);
-        }
-      }
-      toDoInput.value = null
+async function refreshActiveTab(){
+  if (activeTab === activeToDosContainer){
+    try {
+      await getActiveToDos();
+    } catch (error) {
+      console.error(error);
+    }
+  } else if (activeTab === completedToDosContainer){
+    try {
+      await getCompletedToDos();
+    } catch (error) {
+      console.error(error);
+    }
+  } else {
+    try {
+      await getAllToDos();
+    } catch (error) {
+      console.error(error);
     }
   }
 }
 
-async function postNewToDo(toDo, isCompleted) {
+function toggleFilter(clickedTab, toDosContainer){
+  const filters = [allToDosButton, activeToDosButton, completedToDosButton];
+  filters.forEach(filter => {
+    if (filter.id === clickedTab.id){
+      filter.style.color = "var(--pagePrimaryColor)";
+    } else {
+      filter.style.color = "var(--inactiveFontColor)";
+    }
+  });
+
+  const containers = [allToDosContainer, activeToDosContainer, completedToDosContainer];
+  containers.forEach(container => {
+    if (container.id === toDosContainer.id){
+      toggleHiddenClass(container);
+    } else {
+      container.classList.add("hidden");
+    }
+  })
+}
+
+async function createToDo(toDo, isCompleted) {
   try {
-    await fetch("https://todos-app-be.herokuapp.com/todos", {
+    await fetch(`${API_URL}/todos`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -120,137 +148,91 @@ async function postNewToDo(toDo, isCompleted) {
   }
 }
 
+async function fetchToDos(criteriaFunction){
+  try {
+    const response = await fetch(`${API_URL}/todos`);
+    const toDos = await response.json()
+    if (criteriaFunction){
+      return toDos.filter(criteriaFunction);
+    }
+    return toDos;
+  } catch(error){
+    console.error(error);
+  }
+}
+
+function renderToDos(toDos, container){
+  toDos.map(toDo => {
+    container.innerHTML += createTaskTemplate(toDo.isCompleted, toDo.id, toDo.description);
+  })
+
+  setItemsLeft(container);
+}
+
 async function getAllToDos() {
   allToDosContainer.innerHTML = null;
-  try {
-    const toDos = await fetch("https://todos-app-be.herokuapp.com/todos");
-    const toDosJson = await toDos.json()
-    toDosJson.map(toDo => {
-      allToDosContainer.innerHTML += createTaskTemplate(toDo.isCompleted, toDo.id, toDo.description);
-    })
-    const checkButtons = createCheckButtonsArray();
-    listenCheckButtons(checkButtons);
-
-    setItemsLeft();
-
-    const deleteButtons = createDeleteButtonsArray();
-    listenDeleteButtons(deleteButtons, getAllToDos);
-  } catch (error) {
-    console.error(error)
-  }
+  const toDos = await fetchToDos();
+  renderToDos(toDos, allToDosContainer);
 }
 
 async function getActiveToDos() {
   activeToDosContainer.innerHTML = null;
-  try {
-    const toDos = await fetch("https://todos-app-be.herokuapp.com/todos");
-    const toDosJson = await toDos.json()
-    const activeToDos = toDosJson.filter(toDo => !toDo.isCompleted);
-    activeToDos.map(toDo => {
-      activeToDosContainer.innerHTML += createTaskTemplate(toDo.isCompleted, toDo.id, toDo.description);
-    })
-    const checkButtons = createCheckButtonsArray();
-    listenCheckButtons(checkButtons);
-
-    setItemsLeft();
-
-    const deleteButtons = createDeleteButtonsArray();
-    listenDeleteButtons(deleteButtons, getActiveToDos);
-  } catch (error) {
-    console.error(error)
-  }
+  const toDos = await fetchToDos(toDo => !toDo.isCompleted);
+  renderToDos(toDos, activeToDosContainer);
 }
 
 async function getCompletedToDos() {
   completedToDosContainer.innerHTML = null;
-  try {
-    const toDos = await fetch("https://todos-app-be.herokuapp.com/todos");
-    const toDosJson = await toDos.json()
-    const completedToDos = toDosJson.filter(toDo => toDo.isCompleted);
-    completedToDos.map(toDo => {
-      completedToDosContainer.innerHTML += createTaskTemplate(toDo.isCompleted, toDo.id, toDo.description);
-    })
-    const checkButtons = createCheckButtonsArray();
-    listenCheckButtons(checkButtons);
-
-    setItemsLeft();
-
-    const deleteButtons = createDeleteButtonsArray();
-    listenDeleteButtons(deleteButtons, getCompletedToDos);
-  } catch (error) {
-    console.error(error)
-  }
+  const toDos = await fetchToDos(toDo => toDo.isCompleted);
+  renderToDos(toDos, completedToDosContainer);
 }
 
 function createTaskTemplate(isCompleted, id, description) {
   const template = `
   <div class="toDo">
   <div class="checkButtonBorder">
-    <button class="checkButton ${isCompleted ? "active" : ""}">
-      <img src="./Resources/icon-check.svg" alt="check Icon" class="${isCompleted ? "" : "undisplay"}">
+    <button class="checkButton ${isCompleted ? "active" : ""}" id="checkButton${id}" onclick="toggleToDo(${id}, ${isCompleted})">
+      <img src="./Resources/icon-check.svg" alt="check Icon" class="${isCompleted ? "" : "hidden"}" id="checkIcon${id}">
     </button>
   </div>
   <p class="text ${isCompleted ? "completed" : ""}" id="${id}">${description}</p>
-  <button class="deleteButton">
+  <button class="deleteButton" id="deleteButton${id}" onclick="removeToDo(${id})">
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path class="deleteIcon" fill="#494C6B" fill-rule="evenodd" d="M16.97 0l.708.707L9.546 8.84l8.132 8.132-.707.707-8.132-8.132-8.132 8.132L0 16.97l8.132-8.132L0 .707.707 0 8.84 8.132 16.971 0z"/></svg>
   </button>
   `
   return template;
 }
 
-function createCheckButtonsArray(){
-  const buttons = Array.from(document.querySelectorAll(".checkButton:not(#inputCheckButton)"));
-  return buttons;
-}
 
-function createDeleteButtonsArray(){
-  const buttons = Array.from(document.getElementsByClassName("deleteButton"));
-  return buttons;
-}
-
-function setItemsLeft(){
-  const currentToDosContainer = document.querySelectorAll(".toDosContainer>div:not(.undisplay, .toDosFooter)")[0];
-  const numberOfItemsLeft = currentToDosContainer.childElementCount;
+function setItemsLeft(container){
+  const numberOfItemsLeft = container.childElementCount;
   const itemsLeft = document.getElementById("itemsLeft");
-  itemsLeft.innerText = `${numberOfItemsLeft} items left`
+  itemsLeft.innerText = `${numberOfItemsLeft} ${numberOfItemsLeft===1 ? "item left" : "items left"}`;
 }
 
-function listenCheckButtons(checkButtonsArray) {
-  checkButtonsArray.forEach(button => {
-    button.onclick = async () => {
-      toggleActiveClass(button);
-      const task = button.parentElement.nextElementSibling;
-      const checkIconImg = button.firstElementChild;
-      if (button.classList.contains("active")) {
-        checkIconImg.classList.remove("undisplay");
-        try {
-          await patchTask(task.id, task.innerText, true);
-        } catch (error) {
-          console.error(error);
-        }
-        task.classList.add("completed");
-      } else {
-        checkIconImg.classList.add("undisplay");
-        try {
-          const response = patchTask(task.id, task.innerText, false);
-        } catch (error) {
-          console.error(error);
-        }
-        task.classList.remove("completed");
-      }
-    }
-  });
-}
-
-async function patchTask(id, description, isCompleted) {
+async function toggleToDo(id, isCompleted){
+  const task = document.getElementById(id);
+  const button = document.getElementById(`checkButton${id}`)
+  const checkIcon = document.getElementById(`checkIcon${id}`);
   try {
-    await fetch(`https://todos-app-be.herokuapp.com/todos/${id}`, {
+    await patchTask(task.id, !isCompleted);
+    toggleActiveClass(button);
+    toggleHiddenClass(checkIcon);
+    toggleCompletedClass(task);
+  } catch (error) {
+    console.error(error);
+  }
+  refreshActiveTab();
+}
+
+async function patchTask(id, isCompleted) {
+  try {
+    await fetch(`${API_URL}/todos/${id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        "description": description,
         "isCompleted": isCompleted
       })
     })
@@ -259,40 +241,30 @@ async function patchTask(id, description, isCompleted) {
   }
 }
 
-function listenDeleteButtons(deleteButtonsArray, deletedTaskContainerFunction) {
-  deleteButtonsArray.forEach(button => {
-    button.onclick = async () => {
-      const taskId = button.previousElementSibling.id;
-      try {
-        await fetch(`https://todos-app-be.herokuapp.com/todos/${taskId}`, {
-          method: "DELETE"
-        });
-        await deletedTaskContainerFunction();
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  });
-}
-
-clearCompletedButton.onclick = async () => {
+async function removeToDo(id){
   try {
-    await fetch("https://todos-app-be.herokuapp.com/todos/completed", {
+    await fetch(`${API_URL}/todos/${id}`, {
       method: "DELETE"
     });
-    location.reload();
   } catch (error) {
     console.error(error);
   }
+  refreshActiveTab();
 }
 
-function toggleActiveClass(button) {
-  button.classList.toggle("active");
+function toggleActiveClass(element) {
+  element.classList.toggle("active");
 }
 
-function toggleCompletedClass(text) {
-  text.classList.toggle("completed");
+function toggleCompletedClass(element) {
+  element.classList.toggle("completed");
 }
+
+function toggleHiddenClass(element) {
+  element.classList.toggle("hidden");
+}
+
+// Handle dark mode
 
 function changeThemeIcon() {
   if (document.body.classList.contains("darkMode")) {

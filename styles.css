@@ -202,6 +202,7 @@ body {
 
 .itemsLeft {
   color: var(--inactiveFontColor);
+  text-align: center;
 }
 
 .navBar {
@@ -247,7 +248,7 @@ body {
   color: var(--pagePrimaryColor);
 }
 
-.undisplay {
+.hidden {
   display: none;
 }
 
@@ -263,7 +264,7 @@ body {
   }
 
   .navBar {
-    width: fit-content;
+    width: 50%;
     height: fit-content;
     background-color: transparent;
     border: none;
