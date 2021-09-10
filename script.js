@@ -155,6 +155,7 @@ async function fetchToDos(criteriaFunction) {
 }
 
 function renderToDos(toDos, container) {
+  container.innerHTML = null;
   toDos.map(toDo => {
     container.innerHTML += createTaskTemplate(toDo.isCompleted, toDo.id, toDo.description);
   })
@@ -163,19 +164,16 @@ function renderToDos(toDos, container) {
 }
 
 async function getAllToDos() {
-  allToDosContainer.innerHTML = null;
   const toDos = await fetchToDos();
   renderToDos(toDos, allToDosContainer);
 }
 
 async function getActiveToDos() {
-  activeToDosContainer.innerHTML = null;
   const toDos = await fetchToDos(toDo => !toDo.isCompleted);
   renderToDos(toDos, activeToDosContainer);
 }
 
 async function getCompletedToDos() {
-  completedToDosContainer.innerHTML = null;
   const toDos = await fetchToDos(toDo => toDo.isCompleted);
   renderToDos(toDos, completedToDosContainer);
 }
