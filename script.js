@@ -18,6 +18,7 @@ window.onload = async () => {
   } catch (error) {
     console.error(error);
   }
+  activeTab = allToDosContainer;
 }
 
 inputCheckButton.onclick = () => {
@@ -125,6 +126,7 @@ function toggleFilter(clickedTab, toDosContainer) {
 
 async function createToDo(toDo, isCompleted) {
   try {
+    toggleSpinner()
     await fetch(`${API_URL}/todos`, {
       method: "POST",
       headers: {
@@ -137,11 +139,14 @@ async function createToDo(toDo, isCompleted) {
     })
   } catch (error) {
     console.error(error);
+  } finally {
+    toggleSpinner();
   }
 }
 
 async function fetchToDos(criteriaFunction) {
   try {
+    toggleSpinner();
     const response = await fetch(`${API_URL}/todos`);
     const toDos = await response.json();
     sortToDos(toDos);
@@ -151,6 +156,8 @@ async function fetchToDos(criteriaFunction) {
     return toDos;
   } catch (error) {
     console.error(error);
+  } finally {
+    toggleSpinner();
   }
 }
 
@@ -218,6 +225,7 @@ async function toggleToDo(id, isCompleted) {
 
 async function patchTask(id, isCompleted) {
   try {
+    toggleSpinner();
     await fetch(`${API_URL}/todos/${id}`, {
       method: "PATCH",
       headers: {
@@ -229,6 +237,8 @@ async function patchTask(id, isCompleted) {
     })
   } catch (error) {
     console.error(error);
+  } finally {
+    toggleSpinner();
   }
 }
 
@@ -250,6 +260,14 @@ async function sortToDos(toDos) {
   toDos.sort((elementA, elementB) => {
     return elementB.date - elementA.date
   })
+}
+
+function toggleSpinner() {
+  const lightBox = document.getElementById("lightBox");
+  const spinner = document.getElementById("spinnerContainer");
+
+  toggleHiddenClass(lightBox);
+  toggleHiddenClass(spinner);
 }
 
 function toggleActiveClass(element) {
