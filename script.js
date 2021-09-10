@@ -10,7 +10,7 @@ const activeToDosContainer = document.getElementById("activeToDosContainer");
 const completedToDosContainer = document.getElementById("completedToDosContainer");
 const clearCompletedButton = document.getElementById("clearCompletedButton");
 const API_URL = "https://todos-app-be.herokuapp.com";
-let activeTab = "";
+let activeTab = null;
 
 window.onload = async () => {
   try {
@@ -89,32 +89,24 @@ clearCompletedButton.onclick = async () => {
   }
 }
 
-async function refreshActiveTab(){
-  if (activeTab === activeToDosContainer){
-    try {
+async function refreshActiveTab() {
+  try {
+    if (activeTab.id === activeToDosContainer.id) {
       await getActiveToDos();
-    } catch (error) {
-      console.error(error);
-    }
-  } else if (activeTab === completedToDosContainer){
-    try {
+    } else if (activeTab.id === completedToDosContainer.id) {
       await getCompletedToDos();
-    } catch (error) {
-      console.error(error);
-    }
-  } else {
-    try {
+    } else {
       await getAllToDos();
-    } catch (error) {
-      console.error(error);
     }
+  } catch (error) {
+    console.error(error);
   }
 }
 
-function toggleFilter(clickedTab, toDosContainer){
+function toggleFilter(clickedTab, toDosContainer) {
   const filters = [allToDosButton, activeToDosButton, completedToDosButton];
   filters.forEach(filter => {
-    if (filter.id === clickedTab.id){
+    if (filter.id === clickedTab.id) {
       filter.style.color = "var(--pagePrimaryColor)";
     } else {
       filter.style.color = "var(--inactiveFontColor)";
@@ -123,8 +115,8 @@ function toggleFilter(clickedTab, toDosContainer){
 
   const containers = [allToDosContainer, activeToDosContainer, completedToDosContainer];
   containers.forEach(container => {
-    if (container.id === toDosContainer.id){
-      toggleHiddenClass(container);
+    if (container.id === toDosContainer.id) {
+      container.classList.remove("hidden");
     } else {
       container.classList.add("hidden");
     }
@@ -148,20 +140,21 @@ async function createToDo(toDo, isCompleted) {
   }
 }
 
-async function fetchToDos(criteriaFunction){
+async function fetchToDos(criteriaFunction) {
   try {
     const response = await fetch(`${API_URL}/todos`);
-    const toDos = await response.json()
-    if (criteriaFunction){
+    const toDos = await response.json();
+    sortToDos(toDos);
+    if (criteriaFunction) {
       return toDos.filter(criteriaFunction);
     }
     return toDos;
-  } catch(error){
+  } catch (error) {
     console.error(error);
   }
 }
 
-function renderToDos(toDos, container){
+function renderToDos(toDos, container) {
   toDos.map(toDo => {
     container.innerHTML += createTaskTemplate(toDo.isCompleted, toDo.id, toDo.description);
   })
@@ -204,13 +197,13 @@ function createTaskTemplate(isCompleted, id, description) {
 }
 
 
-function setItemsLeft(container){
+function setItemsLeft(container) {
   const numberOfItemsLeft = container.childElementCount;
   const itemsLeft = document.getElementById("itemsLeft");
-  itemsLeft.innerText = `${numberOfItemsLeft} ${numberOfItemsLeft===1 ? "item left" : "items left"}`;
+  itemsLeft.innerText = `${numberOfItemsLeft} ${numberOfItemsLeft === 1 ? "item left" : "items left"}`;
 }
 
-async function toggleToDo(id, isCompleted){
+async function toggleToDo(id, isCompleted) {
   const task = document.getElementById(id);
   const button = document.getElementById(`checkButton${id}`)
   const checkIcon = document.getElementById(`checkIcon${id}`);
@@ -241,7 +234,7 @@ async function patchTask(id, isCompleted) {
   }
 }
 
-async function removeToDo(id){
+async function removeToDo(id) {
   try {
     await fetch(`${API_URL}/todos/${id}`, {
       method: "DELETE"
@@ -250,6 +243,15 @@ async function removeToDo(id){
     console.error(error);
   }
   refreshActiveTab();
+}
+
+async function sortToDos(toDos) {
+  toDos.forEach(toDo => {
+    toDo.date = new Date(toDo.createdAt);
+  });
+  toDos.sort((elementA, elementB) => {
+    return elementB.date - elementA.date
+  })
 }
 
 function toggleActiveClass(element) {
@@ -268,18 +270,18 @@ function toggleHiddenClass(element) {
 
 function changeThemeIcon() {
   if (document.body.classList.contains("darkMode")) {
-    modeButton.innerHTML=`
+    modeButton.innerHTML = `
     <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26"><path class="modeIcon" fill="#FFF" fill-rule="evenodd" d="M13 21a1 1 0 011 1v3a1 1 0 11-2 0v-3a1 1 0 011-1zm-5.657-2.343a1 1 0 010 1.414l-2.121 2.121a1 1 0 01-1.414-1.414l2.12-2.121a1 1 0 011.415 0zm12.728 0l2.121 2.121a1 1 0 01-1.414 1.414l-2.121-2.12a1 1 0 011.414-1.415zM13 8a5 5 0 110 10 5 5 0 010-10zm12 4a1 1 0 110 2h-3a1 1 0 110-2h3zM4 12a1 1 0 110 2H1a1 1 0 110-2h3zm18.192-8.192a1 1 0 010 1.414l-2.12 2.121a1 1 0 01-1.415-1.414l2.121-2.121a1 1 0 011.414 0zm-16.97 0l2.121 2.12A1 1 0 015.93 7.344L3.808 5.222a1 1 0 011.414-1.414zM13 0a1 1 0 011 1v3a1 1 0 11-2 0V1a1 1 0 011-1z"/></svg>
     `
   } else {
-    modeButton.innerHTML=`
+    modeButton.innerHTML = `
     <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26"><path class="modeIcon" fill="#FFF" fill-rule="evenodd" d="M13 0c.81 0 1.603.074 2.373.216C10.593 1.199 7 5.43 7 10.5 7 16.299 11.701 21 17.5 21c2.996 0 5.7-1.255 7.613-3.268C23.22 22.572 18.51 26 13 26 5.82 26 0 20.18 0 13S5.82 0 13 0z"/></svg>
     `
   }
 }
 
-function saveUserThemePreferences(){
-  if (document.body.classList.contains("darkMode")){
+function saveUserThemePreferences() {
+  if (document.body.classList.contains("darkMode")) {
     localStorage.setItem("darkMode", "true");
   } else {
     localStorage.setItem("darkMode", "false");
@@ -297,7 +299,7 @@ if (prefersDarkMode) {
   changeThemeIcon()
 }
 
-if (localStorage.getItem("darkMode") === "true"){
+if (localStorage.getItem("darkMode") === "true") {
   document.body.classList.add("darkMode");
   changeThemeIcon();
 } else {
