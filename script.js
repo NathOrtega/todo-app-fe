@@ -9,7 +9,7 @@ const allToDosContainer = document.getElementById("allToDosContainer");
 const activeToDosContainer = document.getElementById("activeToDosContainer");
 const completedToDosContainer = document.getElementById("completedToDosContainer");
 const clearCompletedButton = document.getElementById("clearCompletedButton");
-const API_URL = "https://todos-app-be.herokuapp.com";
+const API_URL = "https://todo-app-be.up.railway.app";
 let activeTab = null;
 
 window.onload = async () => {
