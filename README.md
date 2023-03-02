@@ -1,9 +1,9 @@
 # To Do App.
 
 ## 🛠 Built with:
-- HTML5.
-- CSS3.
-- Javascript.
+- HTML5
+- CSS3
+- Javascript
 
 ## 🚀 Features:
 
