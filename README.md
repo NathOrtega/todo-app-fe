@@ -1,4 +1,4 @@
-# To Do App.
+# To Do App
 
 ## 🛠 Built with:
 - HTML5
